@@ -75,8 +75,11 @@ mhxy-hp watch-screen --roi 100,100,300,120 --interval 0.5
 可见扣血数字统计：
 
 ```bash
-# 手动/OCR 文本求和，+ 开头的治疗会被忽略，1234/5678 这种血量比值会被忽略
+# 手动/OCR 文本求和，+ 开头的治疗也会计入，1234/5678 这种血量比值会被忽略
 mhxy-hp sum-damage '暴击 2388 +1042 1234/5678 -666 891'
+
+# 如果只想看输出扣血、不计治疗，可以加 --exclude-healing
+mhxy-hp sum-damage '暴击 2388 +1042 1234/5678 -666 891' --exclude-healing
 
 # 从截图 ROI 中用本地 Tesseract OCR 识别可见扣血数字并求和
 mhxy-hp analyze-damage-image /path/to/screenshot.png --roi 150,220,770,650 --ocr

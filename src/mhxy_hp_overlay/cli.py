@@ -119,6 +119,7 @@ def analyze_damage_image(
     ] = None,
     ocr: Annotated[bool, typer.Option("--ocr", help="Run local Tesseract OCR on the ROI")]= False,
     min_amount: Annotated[int, typer.Option(help="Ignore OCR numbers smaller than this")]= 100,
+    exclude_healing: Annotated[bool, typer.Option("--exclude-healing", help="Do not count +healing numbers")]= False,
     json_output: Annotated[bool, typer.Option("--json", help="Print JSON only")]= False,
 ) -> None:
     parsed_roi = parse_roi(roi)
@@ -130,6 +131,7 @@ def analyze_damage_image(
         visible_text=visible_text,
         use_ocr=ocr,
         min_amount=min_amount,
+        include_healing=not exclude_healing,
     )
     print_damage_summary(summary, json_output)
 
@@ -139,9 +141,13 @@ def sum_damage(
     text: Annotated[str, typer.Argument(help="Visible/OCR damage text to parse and sum")],
     name: Annotated[str, typer.Option(help="Display name")]= "damage",
     min_amount: Annotated[int, typer.Option(help="Ignore numbers smaller than this")]= 100,
+    exclude_healing: Annotated[bool, typer.Option("--exclude-healing", help="Do not count +healing numbers")]= False,
     json_output: Annotated[bool, typer.Option("--json", help="Print JSON only")]= False,
 ) -> None:
-    summary = summarize_damage_numbers(extract_damage_numbers(text, min_amount=min_amount), name=name)
+    summary = summarize_damage_numbers(
+        extract_damage_numbers(text, min_amount=min_amount, include_healing=not exclude_healing),
+        name=name,
+    )
     print_damage_summary(summary, json_output)
 
 
@@ -155,6 +161,7 @@ def watch_damage_screen(
         typer.Option(help="Seconds to ignore repeated same damage number across adjacent frames"),
     ] = 0.8,
     min_amount: Annotated[int, typer.Option(help="Ignore OCR numbers smaller than this")]= 100,
+    exclude_healing: Annotated[bool, typer.Option("--exclude-healing", help="Do not count +healing numbers")]= False,
     json_output: Annotated[bool, typer.Option("--json", help="Print JSON lines")]= False,
 ) -> None:
     parsed_roi = parse_roi(roi)
@@ -169,6 +176,7 @@ def watch_damage_screen(
                 name=name,
                 use_ocr=True,
                 min_amount=min_amount,
+                include_healing=not exclude_healing,
             )
             added = tracker.add_numbers(summary.numbers, timestamp=time.time(), source=name)
             if added:

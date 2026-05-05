@@ -46,22 +46,18 @@ def _remove_hp_ratios(text: str) -> str:
     return RATIO_RE.sub(" ", text)
 
 
-def extract_damage_numbers(text: str, *, min_amount: int = 10, include_healing: bool = True) -> list[int]:
+def extract_damage_numbers(text: str, *, min_amount: int = 10) -> list[int]:
     """Extract visible damage/healing numbers from OCR/manual text.
 
     Positive unsigned numbers are treated as visible damage candidates.
     A leading '-' is also treated as damage. A leading '+' is healing and is
-    included by default; pass include_healing=False to exclude it. HP ratios
-    such as 1234/5678 are ignored.
+    included. HP ratios such as 1234/5678 are ignored.
     """
     cleaned = _remove_hp_ratios(text)
     numbers: list[int] = []
     for match in DAMAGE_TOKEN_RE.finditer(cleaned):
-        sign = match.group("sign")
         amount = int(match.group("amount"))
         if amount < min_amount:
-            continue
-        if sign == "+" and not include_healing:
             continue
         numbers.append(amount)
     return numbers
@@ -102,17 +98,13 @@ def analyze_damage_roi(
     visible_text: str | None = None,
     use_ocr: bool = False,
     min_amount: int = 10,
-    include_healing: bool = True,
 ) -> DamageSummary:
     x1, y1, x2, y2 = roi
     crop = image.crop((x1, y1, x2, y2))
     text = visible_text if visible_text is not None else ""
     if use_ocr and not text:
         text = ocr_visible_damage_text(crop)
-    return summarize_damage_numbers(
-        extract_damage_numbers(text, min_amount=min_amount, include_healing=include_healing),
-        name=name,
-    )
+    return summarize_damage_numbers(extract_damage_numbers(text, min_amount=min_amount), name=name)
 
 
 class DamageTracker:

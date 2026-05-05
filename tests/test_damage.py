@@ -14,11 +14,6 @@ def test_extract_damage_numbers_includes_healing_and_ignores_ratios_by_default()
     assert extract_damage_numbers(text) == [2388, 1042, 666, 891]
 
 
-def test_extract_damage_numbers_can_exclude_healing():
-    text = "暴击 2388\n+1042\n气血 1234/5678\n-666\n891"
-
-    assert extract_damage_numbers(text, include_healing=False) == [2388, 666, 891]
-
 
 def test_extract_damage_numbers_respects_min_amount():
     assert extract_damage_numbers("21 970 1000", min_amount=100) == [970, 1000]
@@ -43,20 +38,6 @@ def test_analyze_damage_roi_with_visible_text():
     assert summary.numbers == [2024, 500]
     assert summary.total_damage == 2524
 
-
-def test_analyze_damage_roi_can_exclude_healing():
-    image = Image.new("RGB", (100, 50), "black")
-
-    summary = analyze_damage_roi(
-        image,
-        (0, 0, 100, 50),
-        name="attack1",
-        visible_text="暴击 2024 +500",
-        include_healing=False,
-    )
-
-    assert summary.numbers == [2024]
-    assert summary.total_damage == 2024
 
 
 def test_damage_tracker_deduplicates_recent_same_number():

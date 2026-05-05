@@ -72,7 +72,22 @@ mhxy-hp analyze-image tests/fixtures/synthetic_hp_bar.png --roi 10,10,210,30 --j
 mhxy-hp watch-screen --roi 100,100,300,120 --interval 0.5
 ```
 
-注意：`watch-screen` 只截取屏幕像素，不控制游戏。首次运行可能需要给 Terminal/Python 屏幕录制权限。
+可见扣血数字统计：
+
+```bash
+# 手动/OCR 文本求和，+ 开头的治疗会被忽略，1234/5678 这种血量比值会被忽略
+mhxy-hp sum-damage '暴击 2388 +1042 1234/5678 -666 891'
+
+# 从截图 ROI 中用本地 Tesseract OCR 识别可见扣血数字并求和
+mhxy-hp analyze-damage-image /path/to/screenshot.png --roi 150,220,770,650 --ocr
+
+# 实时盯着一个屏幕 ROI，持续 OCR 可见扣血数字并累计；只读屏幕，不控制游戏
+mhxy-hp watch-damage-screen --roi 150,220,770,650 --interval 0.3 --min-amount 100
+```
+
+扣血数字统计仍然只使用屏幕/截图里已经可见的飘字。它不会读取真实血量、战斗日志、内存或网络包。
+
+注意：`watch-screen` 和 `watch-damage-screen` 只截取屏幕像素，不控制游戏。首次运行可能需要给 Terminal/Python 屏幕录制权限。
 
 ## ROI 格式
 

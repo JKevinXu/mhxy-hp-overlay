@@ -12,7 +12,6 @@ from rich.table import Table
 
 from .analyzer import analyze_hp_roi
 from .capture import capture_screen_roi
-from .compliance import check_feature_scope
 from .roi import parse_roi
 
 app = typer.Typer(help="Visible-screen HP estimator for 梦幻西游手游. No automation or hidden-state access.")
@@ -50,9 +49,6 @@ def analyze_image(
     visible_text: Annotated[str | None, typer.Option(help="Optional visible text such as 1234/5678")] = None,
     json_output: Annotated[bool, typer.Option("--json", help="Print JSON only")] = False,
 ) -> None:
-    decision = check_feature_scope("authorized screenshot visible image analysis")
-    if not decision.allowed:
-        raise typer.BadParameter(decision.reason)
     parsed_roi = parse_roi(roi)
     image = Image.open(image_path)
     result = analyze_hp_roi(image, parsed_roi, name=name, source="image", visible_text=visible_text)
@@ -66,9 +62,6 @@ def watch_screen(
     interval: Annotated[float, typer.Option(help="Seconds between read-only captures")] = 0.5,
     json_output: Annotated[bool, typer.Option("--json", help="Print JSON lines")] = False,
 ) -> None:
-    decision = check_feature_scope("authorized visible screen recording screenshot analysis")
-    if not decision.allowed:
-        raise typer.BadParameter(decision.reason)
     parsed_roi = parse_roi(roi)
     console.print("Read-only screen sampling. Press Ctrl-C to stop.")
     try:
@@ -90,9 +83,3 @@ def watch_screen(
             time.sleep(interval)
     except KeyboardInterrupt:
         console.print("Stopped.")
-
-
-@app.command()
-def check_scope(description: str) -> None:
-    decision = check_feature_scope(description)
-    console.print(json.dumps({"allowed": decision.allowed, "reason": decision.reason}, ensure_ascii=False))
